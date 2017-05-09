@@ -1,164 +1,355 @@
-- title : FsReveal
-- description : Introduction to FsReveal
-- author : Karlkim Suwanmongkol
+- title : C# 7 - Prelude to the Revolustion
+- description :# 7 - Prelude to the Revolustion
+- author : Panagiotis Kanavos
 - theme : night
 - transition : default
 
-***
 
-### What is FsReveal?
+Lots of "small" changes but some are pretty big
 
-- Generates [reveal.js](http://lab.hakim.se/reveal-js/#/) presentation from [markdown](http://daringfireball.net/projects/markdown/)
-- Utilizes [FSharp.Formatting](https://github.com/tpetricek/FSharp.Formatting) for markdown parsing
-- Get it from [http://fsprojects.github.io/FsReveal/](http://fsprojects.github.io/FsReveal/)
+On the road to Expressions
+throw is now an expression
 
-![FsReveal](images/logo.png)
+Value Tuples - Lazy or Crazy?
 
 ***
 
-### Reveal.js
-
-- A framework for easily creating beautiful presentations using HTML.
-
-
-> **Atwood's Law**: any application that can be written in JavaScript, will eventually be written in JavaScript.
-
-***
-
-### FSharp.Formatting
-
-- F# tools for generating documentation (Markdown processor and F# code formatter).
-- It parses markdown and F# script file and generates HTML or PDF.
-- Code syntax highlighting support.
-- It also evaluates your F# code and produce tooltips.
-
-***
-
-### Syntax Highlighting
-
-#### F# (with tooltips)
-
-    let a = 5
-    let factorial x = [1..x] |> List.reduce (*)
-    let c = factorial a
-
----
-
-#### C#
+### Decomposition - Where are my keys?
 
     [lang=cs]
-    using System;
-
-    class Program
+    foreach(var (key,pair) in myDictionary)
     {
-        static void Main()
+        //
+    }
+
+***
+
+### Local Functions
+
+- Small functions defined inside another
+- Faster than lambdas - no allocations
+- Improved readability
+
+***
+
+### Timely argument validation!
+
+- Iterators, async methods won't throw until first yield/await
+- Fixed with local functions
+
+*** 
+
+### Example - argument validation
+
+    [lang=cs]
+        Task MyMethod(sring somePath)
         {
-            Console.WriteLine("Hello, world!");
+            if (String.IsNullOrWhiteSpace(somePath)) throw new ArgumentException(nameof(somePath));
+
+            async Task doX()
+            {
+                var result=await x.DoSomething();
+            }
+
+            return doX();
         }
-    }
 
----
+***
 
-#### JavaScript
+### Functional Dependency injection 
 
-    [lang=js]
-    function copyWithEvaluation(iElem, elem) {
-        return function (obj) {
-            var newObj = {};
-            for (var p in obj) {
-                var v = obj[p];
-                if (typeof v === "function") {
-                    v = v(iElem, elem);
-                }
-                newObj[p] = v;
+- Store a lastProcessed file. How to test
+- Interface DI - IFileRead,IFileExist. YUCK!
+- Why not pass the functions themselves?
+- Could do it before, easier now
+- How hard could it be?
+
+***
+
+### The injectionable class
+
+    [lang=cs]
+        public static class Cutoff
+        {
+            //Load the stored cutoff value, MinDate otherwise
+            public static DateTime LoadFrom(string cutoffFile,Func<string,bool> exists=null,Func<string,string> read=null)
+            {
+                exists = exists ?? File.Exists;
+                read = read ?? File.ReadAllText;
+
+                if (!exists(cutoffFile)) return DateTime.MinValue;
+
+                DateTime.TryParse(read(cutoffFile), out DateTime cutoff1);
+                return cutoff1;
             }
-            if (!newObj.exactTiming) {
-                newObj.delay += exports._libraryDelay;
+
+            //Store the current time as a cutoff value.
+            public static void StoreTo(string cutoffFile,Action<string,string> write=null)
+            {
+                write = write ?? File.WriteAllText;
+                write(cutoffFile, DateTime.UtcNow.ToString("u"));
             }
-            return newObj;
-        };
-    }
 
+        }    
 
----
+***
 
-#### Haskell
- 
-    [lang=haskell]
-    recur_count k = 1 : 1 : 
-        zipWith recurAdd (recur_count k) (tail (recur_count k))
-            where recurAdd x y = k * x + y
+### The tests
 
-    main = do
-      argv <- getArgs
-      inputFile <- openFile (head argv) ReadMode
-      line <- hGetLine inputFile
-      let [n,k] = map read (words line)
-      printf "%d\n" ((recur_count k) !! (n-1))
+    [lang=cs]
+        [Test]
+        public void CanLoadFromExistingFile()
+        {
+            var expected=new DateTime(2017,4,1);
 
-*code from [NashFP/rosalind](https://github.com/NashFP/rosalind/blob/master/mark_wutka%2Bhaskell/FIB/fib_ziplist.hs)*
+            var result=Cutoff.LoadFrom("existingFile", exists => true, read => "2017-04-01");
 
----
+            Assert.That(result,Is.EqualTo(expected));
 
-### SQL
+        }        
 
-    [lang=sql]
-    select *
-    from
-    (select 1 as Id union all select 2 union all select 3) as X
-    where Id in (@Ids1, @Ids2, @Ids3)
+        [Test]
+        public void MissingFileReturnsMinDate()
+        {
+            var result = Cutoff.LoadFrom("noFile", exists => false);
 
-*sql from [Dapper](https://code.google.com/p/dapper-dot-net/)*
+            Assert.That(result, Is.EqualTo(DateTime.MinValue));
 
----
+        }        
 
-### Paket
+***
 
-    [lang=paket]
-    source https://nuget.org/api/v2
+### Benefits
 
-    nuget Castle.Windsor-log4net >= 3.2
-    nuget NUnit
+- Adheres to the interfaces non-proliferation treaty
+- No need for a DI container to test
+- Very clean tests
+- Default behaviour 
+
+***
+
+###
+
+Pattern Matching and The Guns of Navarone
+
+Not complete but the revolution is coming
+Better than overrides or Visitor
+
+***
+
+### Nick Craver is Happy (and Dapper too)
+
+    Cast and type check at once
+    https://twitter.com/Nick_Craver/status/861258820991037440
+
+    From 
+    [lang=cs]
+        public static bool Update<T>(this IDbConnection connection...)
+        {
+            var proxy= entityToUpdate as IProxy;
+            if (proxy!-null)
+            {
+                if (!proxy.IsDirty) return false;
+            }
+            //Now start working
+        }
+        
+    [lang=cs]
+
+        public static bool Update<T>(this IDbConnection connection...)
+        {
+            if (entityToUpdate is IProxy proxy && !proxy.IsDirty)
+            {
+                return false;
+            }
+            //Now start working
+        }
+
+*** 
+
+### Out varialbes
+
+- Just saving a line
+- And tightening the scope
+- But when you put it together
+
+***
+
+### Nick Craver is happy again
+
+    From 
+    [lang=cs]
+        object SqlMapper.IParameterLookup.this[string name]
+        {
+            get
+            {
+                ParamInfo param;
+                return parameters.TryGetValue(name,out param)?param.Value : null;
+            }
+        }
     
-    github forki/FsUnit FsUnit.fs
-      
----
+    To
+    [lang=cs]
+        object SqlMapper.IParameterLookup.this[string name] =>
+            parameters.TryGetValue(name,out ParamInfo param)?param.Value : null;
+    
+    That's where local functions are born
 
-### C/AL
+A sniff of gunpowder
 
-    [lang=cal]
-    PROCEDURE FizzBuzz(n : Integer) r_Text : Text[1024];
-    VAR
-      l_Text : Text[1024];
-    BEGIN
-      r_Text := '';
-      l_Text := FORMAT(n);
-
-      IF (n MOD 3 = 0) OR (STRPOS(l_Text,'3') > 0) THEN
-        r_Text := 'Fizz';
-      IF (n MOD 5 = 0) OR (STRPOS(l_Text,'5') > 0) THEN
-        r_Text := r_Text + 'Buzz';
-      IF r_Text = '' THEN
-        r_Text := l_Text;
-    END;
+New error handling scenarios
 
 ***
 
-**Bayes' Rule in LaTeX**
+### Go's multiple return values
 
-$ \Pr(A|B)=\frac{\Pr(B|A)\Pr(A)}{\Pr(B|A)\Pr(A)+\Pr(B|\neg A)\Pr(\neg A)} $
+    [lang=cs]
+        (string result,string error) TheQuestion()
+        {
+            if (vogonsArrived)
+            {
+                return (null,"Goodbye and thanks for all the fish");
+            }
+            else 
+            {
+                return ("How much is 6 by 8?",null);
+            }            
+        }
+
+
+        var (result,error)=TheQuestion();
 
 ***
 
-### The Reality of a Developer's Life 
+### Caveats
 
-**When I show my boss that I've fixed a bug:**
-  
-![When I show my boss that I've fixed a bug](http://www.topito.com/wp-content/uploads/2013/01/code-07.gif)
-  
-**When your regular expression returns what you expect:**
-  
-![When your regular expression returns what you expect](http://www.topito.com/wp-content/uploads/2013/01/code-03.gif)
-  
-*from [The Reality of a Developer's Life - in GIFs, Of Course](http://server.dzone.com/articles/reality-developers-life-gifs)*
+    - Only `variable not used` warning if error ignored
+    - No warning if tuple isn't decomposed
+    - Take care to avoid the ignored error curse    
+    - Not for public APIs - names aren't preserved
+
+*** 
+
+### Pattern Matching and Case Types
+
+- Scala feature
+- One type, multiple cases
+- No base type littering
+- More Nick Craver happiness
+- Result<TSuccess,TFailure> 
+
+***
+
+### Getting rid of type checking
+
+Circles, boxes, yada yada
+
+    [lang=cs]
+        switch(shape)
+        {
+            case Circle c:
+                WriteLine($"circle with radius {c.Radius}");
+                break;
+            case Rectangle s when (s.Length == s.Height):
+                WriteLine($"{s.Length} x {s.Height} square");
+                break;
+            case Rectangle r:
+                WriteLine($"{r.Length} x {r.Height} rectangle");
+                break;
+            default:
+                WriteLine("<unknown shape>");
+                break;
+            case null:
+                throw new ArgumentNullException(nameof(shape));
+        }
+***
+
+### How about some *real* gains?
+
+    From 
+    [lang=cs]
+        private static bool TryStringSplit(ref IEnumerable list,int splitAt,string namePrefix,IDbCommand command, bool byPosition)
+        {
+            if (list==null || splitAt<0) return false;
+            //Have to specify the types explicitly
+            if (list is IEnumerable<int>) return TryStringSplit<int>(ref list, splitAt,namePrefix, command,"int",byPostition,
+                (sb,i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
+            if (list is IEnumerable<long>) return TryStringSplit<long>(ref list, splitAt,namePrefix, command,"long",byPostition,
+                (sb,i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));        
+            //Enough already !!
+        }
+
+***
+
+### How about some *real* gains?
+
+    To 
+    [lang=cs]
+        private static bool TryStringSplit(ref IEnumerable list,int splitAt,string namePrefix,IDbCommand command, bool byPosition)
+        {
+            if (list==null || splitAt<0) return false;
+            switch(list)
+            {
+                //It's strongly typed!
+                case IEnumerable<int> l:
+                    //No need to specify a type!
+                    return TryStringSplit(ref l, splitAt,namePrefix, command,"int",byPostition,
+                        (sb,i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
+                case IEnumerable<long> l:
+                    return TryStringSplit(ref l, splitAt,namePrefix, command,"long",byPostition,
+                        (sb,i) => sb.Append(i.ToString(CultureInfo.InvariantCulture)));
+            }            
+        }
+
+***
+
+### Result Type
+
+- Return a Result<TSuccess,TFailure> type 
+- Allows composition of functions
+- Works for public APIs
+
+
+***
+
+### Example
+
+    [lang=cs]
+        public interface IResult<TSuccess,TFailure>{}
+        public class Success<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
+            public TSuccess {get;set;}
+        }
+        public class Failure<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
+            public TFailure {get;set;}
+        }
+
+        public IResult<int,string> DoSomething(){};
+
+        public IResult<int,string> DoAnother()
+        {
+            var result=DoSomething();
+            switch(result)
+            {
+                case Success<MyDTO,string> c: return new Success(-c);
+                break;
+            }
+        }
+
+***
+
+### Return types can be chained
+
+
+***
+
+### Caveats
+
+- No exhaustive matching
+- Take care to avoid the ignored error curse
+
+Exceptions are *Exceptional*
+Like a blown fuse
+Not a logging control flow statement
+
+What about non-critical *errors*
 
