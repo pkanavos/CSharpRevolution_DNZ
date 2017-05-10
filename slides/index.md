@@ -44,7 +44,7 @@ On the road to Expressions
     [lang=CS]
     public void MyMethod(MyClass someParam)
     {
-        var myVar = someParam ?? throw new ArgumentException(nameof(name));
+        var myVar = someParam ?? throw new ArgumentException(nameof(someParam));
     }
 
 *** 
@@ -72,7 +72,7 @@ Use
 	    var (first,last) =LookupName(4);
 	    Console.WriteLine(first);
 
-
+' Note: Show Demo
 *** 
 
 ### Why not build a class?
@@ -120,7 +120,7 @@ Solved with records in C# 8+
 ### Where are my keys?
 
     [lang=cs]
-    public static void Decompose<T,V>(this IDictionary<T,V> pair,out T key, out V value)
+    public static void Decompose<T,V>(this KeyValuePair<T,V> pair,out T key, out V value)
     {key=pair.Key; value=pair.Value; }
 
     foreach(var (key,pair) in myDictionary)
@@ -461,6 +461,7 @@ What about non-critical *errors*
 ### Caveats 
 
 - Only `variable not used` warning if error ignored
+> - Can be set as Error
 - No warning if tuple isn't decomposed
 - Take care to avoid the ignored error curse    
 - Not for public APIs - names aren't preserved
@@ -492,14 +493,14 @@ What about non-critical *errors*
     [lang=cs]
         public interface IResult<TSuccess,TFailure>{}
         public class Success<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
-            public TSuccess Success {get;}
+            public TSuccess Result {get;}
 
-            Success(TSuccess it)=> Success=it;
+            Success(TSuccess it)=> Result=it;
         }
         public class Failure<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
             public TFailure Error {get;}
 
-            Success(TFailure it)=> Error=it;
+            Failure(TFailure it)=> Error=it;
         }
 
 ***
