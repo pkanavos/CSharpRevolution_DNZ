@@ -22,14 +22,14 @@ with some big consequences
 
 - Throw Expressions
 - Value Tuples and Multiple return values
-- Decomposition
+- Deconstruction
 - Out variables
 - Pattern Matching
 - Local Functions
 
 *** 
 
-### Throw Expressins
+### Throw Expressions
 On the road to Expressions
 
 - Expressions return values. Statements don't
@@ -168,7 +168,19 @@ Solved with records in C# 8+
 ### Functional Dependency injection 
 
 - Store a lastProcessed file. How to test
+
+- Test-Induced Design Damage
+
+![Nest](images/rats_nest.jpg)
+
+***
+
+### Test-Induced Design Damage
+
 - Interface DI - IFileRead,IFileExist. YUCK!
+- Mock : Virtual Read, Exists. ICK
+
+>
 - Why not pass the functions themselves?
 - Could do it before, easier now
 - How hard could it be?
@@ -177,61 +189,62 @@ Solved with records in C# 8+
 
 ### The injectionable class
 
-    [lang=cs]
-        public static class Cutoff
+	[lang=cs]
+    public static class Cutoff
+    {
+        //Load the stored cutoff value, MinDate otherwise
+        public static DateTime LoadFrom(string cutoffFile,
+        	Func<string,bool> exists=null,Func<string,string> read=null)
         {
-            //Load the stored cutoff value, MinDate otherwise
-            public static DateTime LoadFrom(string cutoffFile,Func<string,bool> exists=null,Func<string,string> read=null)
-            {
-                exists = exists ?? File.Exists;
-                read = read ?? File.ReadAllText;
+            exists = exists ?? File.Exists;
+            read = read ?? File.ReadAllText;
 
-                if (!exists(cutoffFile)) return DateTime.MinValue;
+            if (!exists(cutoffFile)) return DateTime.MinValue;
 
-                //out variable - The only C# 7 specific feature here!
-                DateTime.TryParse(read(cutoffFile), out DateTime cutoff1);
-                return cutoff1;
-            }
+            //out variable - The only C# 7 specific feature here!
+            DateTime.TryParse(read(cutoffFile), out DateTime cutoff1);
+            return cutoff1;
+        }
 
-            //Store the current time as a cutoff value.
-            public static void StoreTo(string cutoffFile,Action<string,string> write=null)
-            {
-                write = write ?? File.WriteAllText;
-                write(cutoffFile, DateTime.UtcNow.ToString("u"));
-            }
+        //Store the current time as a cutoff value.
+        public static void StoreTo(string cutoffFile,Action<string,string> write=null)
+        {
+            write = write ?? File.WriteAllText;
+            write(cutoffFile, DateTime.UtcNow.ToString("u"));
+        }
 
-        }    
+    }    
 
 ***
 
 ### The tests
 
     [lang=cs]
-        [Test]
-        public void CanLoadFromExistingFile()
-        {
-            var expected=new DateTime(2017,4,1);
+    [Test]
+    public void CanLoadFromExistingFile()
+    {
+        var expected=new DateTime(2017,4,1);
 
-            var result=Cutoff.LoadFrom("existingFile", exists => true, read => "2017-04-01");
+        var result=Cutoff.LoadFrom("existingFile", exists => true, read => "2017-04-01");
 
-            Assert.That(result,Is.EqualTo(expected));
+        Assert.That(result,Is.EqualTo(expected));
 
-        }        
+    }        
 
-        [Test]
-        public void MissingFileReturnsMinDate()
-        {
-            var result = Cutoff.LoadFrom("noFile", exists => false);
+    [Test]
+    public void MissingFileReturnsMinDate()
+    {
+        var result = Cutoff.LoadFrom("noFile", exists => false);
 
-            Assert.That(result, Is.EqualTo(DateTime.MinValue));
+        Assert.That(result, Is.EqualTo(DateTime.MinValue));
 
-        }        
+    }        
 
 ***
 
 ### Benefits
 
-- Adheres to the interfaces non-proliferation treaty ![Nuke](images\nuke.jpg)
+- Adheres to the Interfaces Non-Proliferation Treaty ![Nuke](images\nuke.jpg)
 - No need for a DI container to test
 - Very clean tests
 - Default behaviour 
