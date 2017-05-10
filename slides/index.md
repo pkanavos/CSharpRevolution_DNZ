@@ -1,22 +1,128 @@
-- title : C# 7 - Prelude to the Revolustion
-- description :# 7 - Prelude to the Revolustion
+- title : C# 7 - Prelude to the Revolution
+- description :# 7 - Prelude to the Revolution
 - author : Panagiotis Kanavos
 - theme : night
 - transition : default
 
+# C# 7 
 
-Lots of "small" changes but some are pretty big
+![FsReveal](images/CSharp_Revolution.jpg)
 
-On the road to Expressions
-throw is now an expression
+##Prelude to the 
+##Functional Revolution
 
-Value Tuples - Lazy or Crazy?
+*** 
+
+### Lots of "small" changes 
+with some big consequences
 
 ***
 
-### Decomposition - Where are my keys?
+### A short list
+
+- Throw Expressions
+- Value Tuples and Multiple return values
+- Decomposition
+- Out variables
+- Pattern Matching
+- Local Functions
+
+*** 
+
+### Throw Expressins
+On the road to Expressions
+
+- Expressions return values. Statements don't
+- Functional languages use expressions *a lot*
+- throw is now an expression
+- Assignment is also an expression
+
+*** 
+
+### This is now possible
+
+    [lang=CS]
+    public void MyMethod(MyClass someParam)
+    {
+        var myVar = someParam ?? throw new ArgumentException(nameof(name));
+    }
+
+*** 
+
+### Value Tuples - Lazy or Crazy?
+
+- Tuples with names
+- Value types - no allocation penalties
+- Work where anonymous types don't
+- Compiler magic
+
+***
+
+	[lang=CS]
+	    (string first, string last) LookupName(long id){ return (first:"a", last:"b");}
+        //or
+	    (string first, string last) LookupName(long id) => (first:"a", last:"b");
+
+Use
+
+    [lang=CS]	
+	    var result=LookupName(4);
+	    Console.WriteLine(result.first);
+	    //or
+	    var (first,last) =LookupName(4);
+	    Console.WriteLine(first);
+
+
+*** 
+
+### Why not build a class?
+
+Because :
+
+- Very easy to define
+- *Value Equality* - no need for Equals, GetHashCode etc.
+- No allocations, no GC
+
+***
+
+### Caveats
+
+- Compiler magic -> No real names
+- No reflection
+- Can't use in public APIs
+- Structs -> Lots of copying
+
+Solved with records in C# 8+
+
+    [lang=CS]
+    class Point(int X, int Y, int Z);
+
+
+***
+
+### Deconstruction
+
+![Stinking](images\Deconstruction.jpg)
+
+*** 
+
+### What?
+
+- Deconstruct tuples
+- Or any type with a `void Deconstruct(out)` method
+- Works with extension methods too
+- `Variable not used` warning if a variable isn't used
+
+
+
+*** 
+
+### Where are my keys?
 
     [lang=cs]
+    public static void Decompose<T,V>(this IDictionary<T,V> pair,out T key, out V value)
+    {key=pair.Key; value=pair.Value; }
+
     foreach(var (key,pair) in myDictionary)
     {
         //
@@ -42,16 +148,19 @@ Value Tuples - Lazy or Crazy?
 ### Example - argument validation
 
     [lang=cs]
-        Task MyMethod(sring somePath)
+        IEnumerable<int> MyMethod(int count)
         {
-            if (String.IsNullOrWhiteSpace(somePath)) throw new ArgumentException(nameof(somePath));
+            if (count<0) throw new ArgumentException(nameof(count));
 
-            async Task doX()
+            IEnumerable<int> doCount()
             {
-                var result=await x.DoSomething();
+                for(int i=0;i<count;i++)
+                {
+                	yield return someComplexCalculation(i);
+                }
             }
 
-            return doX();
+            return doCount();
         }
 
 ***
@@ -79,6 +188,7 @@ Value Tuples - Lazy or Crazy?
 
                 if (!exists(cutoffFile)) return DateTime.MinValue;
 
+                //out variable - The only C# 7 specific feature here!
                 DateTime.TryParse(read(cutoffFile), out DateTime cutoff1);
                 return cutoff1;
             }
@@ -121,19 +231,48 @@ Value Tuples - Lazy or Crazy?
 
 ### Benefits
 
-- Adheres to the interfaces non-proliferation treaty
+- Adheres to the interfaces non-proliferation treaty ![Nuke](images\nuke.jpg)
 - No need for a DI container to test
 - Very clean tests
 - Default behaviour 
 
 ***
 
-###
+### Memoization
 
-Pattern Matching and The Guns of Navarone
+Take any function and cache intermediate results
 
-Not complete but the revolution is coming
-Better than overrides or Visitor
+	[lang=CS]
+	public Func<TIn,TOut> Memoize<TIn,TOut>(Func<TIn,TOut> f)
+	{
+		var cache=new Dictionary<TIn,TOUt>();
+		TOut do(TIn x) 
+		{
+	        if (cache.ContainsKey(x)) return cache[x];
+	        else 
+	        {
+	            var result=f(x);
+	            cache[x]=result;
+	            return result;
+	        }
+	    }
+
+	    return do;
+	}
+
+***
+
+### Pattern Matching and The Guns of Navarone
+
+![Gun](images\Gun.jpg)
+
+*** 
+
+### What are they?
+
+- Test a value against a "shape" - values or types
+- Not complete but the revolution is coming
+- Better than overrides or Visitor
 
 ***
 
@@ -165,79 +304,6 @@ Better than overrides or Visitor
             //Now start working
         }
 
-*** 
-
-### Out varialbes
-
-- Just saving a line
-- And tightening the scope
-- But when you put it together
-
-***
-
-### Nick Craver is happy again
-
-    From 
-    [lang=cs]
-        object SqlMapper.IParameterLookup.this[string name]
-        {
-            get
-            {
-                ParamInfo param;
-                return parameters.TryGetValue(name,out param)?param.Value : null;
-            }
-        }
-    
-    To
-    [lang=cs]
-        object SqlMapper.IParameterLookup.this[string name] =>
-            parameters.TryGetValue(name,out ParamInfo param)?param.Value : null;
-    
-    That's where local functions are born
-
-A sniff of gunpowder
-
-New error handling scenarios
-
-***
-
-### Go's multiple return values
-
-    [lang=cs]
-        (string result,string error) TheQuestion()
-        {
-            if (vogonsArrived)
-            {
-                return (null,"Goodbye and thanks for all the fish");
-            }
-            else 
-            {
-                return ("How much is 6 by 8?",null);
-            }            
-        }
-
-
-        var (result,error)=TheQuestion();
-
-***
-
-### Caveats
-
-    - Only `variable not used` warning if error ignored
-    - No warning if tuple isn't decomposed
-    - Take care to avoid the ignored error curse    
-    - Not for public APIs - names aren't preserved
-
-*** 
-
-### Pattern Matching and Case Types
-
-- Scala feature
-- One type, multiple cases
-- No base type littering
-- More Nick Craver happiness
-- Result<TSuccess,TFailure> 
-
 ***
 
 ### Getting rid of type checking
@@ -262,11 +328,13 @@ Circles, boxes, yada yada
             case null:
                 throw new ArgumentNullException(nameof(shape));
         }
+
 ***
 
 ### How about some *real* gains?
 
-    From 
+From 
+
     [lang=cs]
         private static bool TryStringSplit(ref IEnumerable list,int splitAt,string namePrefix,IDbCommand command, bool byPosition)
         {
@@ -301,6 +369,100 @@ Circles, boxes, yada yada
             }            
         }
 
+
+
+*** 
+
+### Out varialbes
+
+- Just saving a line
+- And tightening the scope
+- But when you put it together
+
+***
+
+### Nick Craver is happy again
+
+From 
+
+    [lang=cs]
+        object SqlMapper.IParameterLookup.this[string name]
+        {
+            get
+            {
+                ParamInfo param;
+                return parameters.TryGetValue(name,out param)?param.Value : null;
+            }
+        }
+    
+To
+
+    [lang=cs]
+        object SqlMapper.IParameterLookup.this[string name] =>
+            parameters.TryGetValue(name,out ParamInfo param)?param.Value : null;
+    
+That's where local functions are born
+
+***
+
+### A whiff  of gunpowder
+
+- New error handling scenarios
+- Exceptions are *Exceptional*
+- Like a blown fuse, not a light switch
+- Not a logging control flow statement
+
+What about non-critical *errors*
+
+![Fire](images/FuseFire.jpg)
+
+***
+
+### Go's multiple return values
+
+
+    [lang=cs]
+        (string result,string error) TheQuestion()
+        {
+            if (vogonsArrived)
+            {
+                return (null,"Goodbye and thanks for all the fish");
+            }
+            else 
+            {
+                return ("How much is 6 by 8?",null);
+            }            
+        }
+
+
+        var (result,error)=TheQuestion();
+
+***
+
+### Caveats
+
+![Fuses](images\Fuses.jpg)
+
+***
+
+### Caveats 
+
+- Only `variable not used` warning if error ignored
+- No warning if tuple isn't decomposed
+- Take care to avoid the ignored error curse    
+- Not for public APIs - names aren't preserved
+
+*** 
+
+### Pattern Matching and Case Types
+
+- Scala feature
+- One type, multiple cases
+- No base type littering
+- More Nick Craver happiness
+- Result<TSuccess,TFailure> 
+
+
 ***
 
 ### Result Type
@@ -317,27 +479,34 @@ Circles, boxes, yada yada
     [lang=cs]
         public interface IResult<TSuccess,TFailure>{}
         public class Success<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
-            public TSuccess {get;set;}
+            public TSuccess Success {get;}
+
+            Success(TSuccess it)=> Success=it;
         }
         public class Failure<TSuccess,TFailure>:IResult<TSuccess,TFailure>{
-            public TFailure {get;set;}
-        }
+            public TFailure Error {get;}
 
-        public IResult<int,string> DoSomething(){};
-
-        public IResult<int,string> DoAnother()
-        {
-            var result=DoSomething();
-            switch(result)
-            {
-                case Success<MyDTO,string> c: return new Success(-c);
-                break;
-            }
+            Success(TFailure it)=> Error=it;
         }
 
 ***
 
-### Return types can be chained
+### Usage        
+
+	[lang=CS]
+    public IResult<int,string> DoSomething(){};
+
+    public IResult<int,string> DoAnother()
+    {
+        var result=DoSomething();
+        switch(result)
+        {
+            case Success<int,string> c: return new Success(-c.Success);
+            case Failure<int,string> c: return new Failure(c.Error)
+        }
+    }
+
+Return types can be chained
 
 
 ***
@@ -347,9 +516,4 @@ Circles, boxes, yada yada
 - No exhaustive matching
 - Take care to avoid the ignored error curse
 
-Exceptions are *Exceptional*
-Like a blown fuse
-Not a logging control flow statement
-
-What about non-critical *errors*
 
