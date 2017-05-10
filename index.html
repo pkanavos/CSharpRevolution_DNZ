@@ -1,0 +1,812 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Presentation</title>
+    <meta name="description" content="">
+    <meta name="author" content="unkown">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="//code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="//code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/night.css" id="theme">
+    <link type="text/css" rel="stylesheet" href="fsharp.formatting/styles/style.css" />
+    <link type="text/css" rel="stylesheet" href="fsharp.formatting/styles/deedle.css" />
+    <link type="text/css" rel="stylesheet" href="css/custom.css" />
+    <script src="fsharp.formatting/styles/tips.js" type="text/javascript"></script>
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <link rel="stylesheet" href="css/fsreveal.css">
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+    </script>
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+    <script language="javascript" type="text/javascript">
+        function init()
+        {
+            websocket = new WebSocket("ws://"+window.location.host+"/websocket");
+            websocket.onmessage = function(evt) { location.reload(); };
+        }
+        window.addEventListener("load", init, false);
+    </script>
+</head>
+<body>
+    <div class="reveal">
+        <div class="tip" id="fs1">type bool = System.Boolean<br /><br />Full name: Microsoft.FSharp.Core.bool</div>
+<div class="tip" id="fs2">Multiple items<br />val ref : value:&#39;T -&gt; &#39;T ref<br /><br />Full name: Microsoft.FSharp.Core.Operators.ref<br /><br />--------------------<br />type &#39;T ref = Ref&lt;&#39;T&gt;<br /><br />Full name: Microsoft.FSharp.Core.ref&lt;_&gt;</div>
+<div class="tip" id="fs3">type &#39;T list = List&lt;&#39;T&gt;<br /><br />Full name: Microsoft.FSharp.Collections.list&lt;_&gt;</div>
+<div class="tip" id="fs4">Multiple items<br />val int : value:&#39;T -&gt; int (requires member op_Explicit)<br /><br />Full name: Microsoft.FSharp.Core.Operators.int<br /><br />--------------------<br />type int = int32<br /><br />Full name: Microsoft.FSharp.Core.int<br /><br />--------------------<br />type int&lt;&#39;Measure&gt; = int<br /><br />Full name: Microsoft.FSharp.Core.int&lt;_&gt;</div>
+<div class="tip" id="fs5">Multiple items<br />val string : value:&#39;T -&gt; string<br /><br />Full name: Microsoft.FSharp.Core.Operators.string<br /><br />--------------------<br />type string = System.String<br /><br />Full name: Microsoft.FSharp.Core.string</div>
+
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section author="Panagiotis Kanavos" description="# 7 - Prelude to the Revolution" theme="night" title="C# 7 - Prelude to the Revolution" transition="default">
+<h1>C# 7</h1>
+<p><img src="images/CSharp_Revolution.jpg" alt="FsReveal" /></p>
+<h2>Prelude to the</h2>
+<h2>Functional Revolution</h2>
+</section>
+<section >
+<h3>Lots of "small" changes</h3>
+<p>with some big consequences</p>
+</section>
+<section >
+<h3>A short list</h3>
+<ul>
+<li>Throw Expressions</li>
+<li>Value Tuples and Multiple return values</li>
+<li>Deconstruction</li>
+<li>Out variables</li>
+<li>Pattern Matching</li>
+<li>Local Functions</li>
+</ul>
+</section>
+<section >
+<h3>Throw Expressions</h3>
+<p>On the road to Expressions</p>
+<ul>
+<li>Expressions return values. Statements don't</li>
+<li>Functional languages use expressions <em>a lot</em></li>
+<li>throw is now an expression</li>
+<li>Assignment is also an expression</li>
+</ul>
+</section>
+<section >
+<h3>This is now possible</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">public void MyMethod(MyClass someParam)
+{
+    var myVar = someParam ?? throw new ArgumentException(nameof(someParam));
+}
+</code></pre></td></tr></table>
+</section>
+<section >
+<h3>Value Tuples - Lazy or Crazy?</h3>
+<ul>
+<li>Tuples with names</li>
+<li>Value types - no allocation penalties</li>
+<li>Work where anonymous types don't</li>
+<li>Compiler magic</li>
+</ul>
+</section>
+<section >
+<p>Define as</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">    (string first, string last) LookupName(long id){ return (first:"a", last:"b");}
+    //or
+    (string first, string last) LookupName(long id) =&gt; (first:"a", last:"b");
+</code></pre></td></tr></table>
+<p>Use</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">    var result=LookupName(4);
+    Console.WriteLine(result.first);
+    //or
+    var (first,last) =LookupName(4);
+    Console.WriteLine(first);
+</code></pre></td></tr></table>
+<aside class="notes">
+Note: Show Demo<br/>
+</aside>
+</section>
+<section >
+<h3>Why not build a class?</h3>
+<p>Because :</p>
+<ul>
+<li>Very easy to define</li>
+<li><em>Value Equality</em> - no need for Equals, GetHashCode etc.</li>
+<li>No allocations, no GC</li>
+</ul>
+</section>
+<section >
+<h3>Caveats</h3>
+<ul>
+<li>Compiler magic -&gt; No real names</li>
+<li>No reflection</li>
+<li>Can't use in public APIs</li>
+<li>Structs -&gt; Lots of copying</li>
+</ul>
+<p>Solved with records in C# 8+</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">class Point(int X, int Y, int Z);
+</code></pre></td></tr></table>
+</section>
+<section >
+<h3>Deconstruction</h3>
+<p><img src="images\Deconstruction.jpg" alt="Stinking" /></p>
+</section>
+<section >
+<h3>What?</h3>
+<ul>
+<li>Deconstruct tuples</li>
+<li>Or any type with a <code>void Deconstruct(out)</code> method</li>
+<li>Works with extension methods too</li>
+<li><code>Variable not used</code> warning if a variable isn't used</li>
+</ul>
+</section>
+<section >
+<h3>Where are my keys?</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs"><span class="k">public</span> <span class="k">static</span> <span class="k">void</span> Decompose&lt;T,V&gt;(<span class="k">this</span> KeyValuePair&lt;T,V&gt; pair,<span class="k">out</span> T key, <span class="k">out</span> V <span class="k">value</span>)
+{key=pair.Key; <span class="k">value</span>=pair.Value; }
+
+<span class="k">foreach</span>(<span class="k">var</span> (key,pair) <span class="k">in</span> myDictionary)
+{
+    <span class="c">//</span>
+}
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Local Functions</h3>
+<ul>
+<li>Small functions defined inside another</li>
+<li>Faster than lambdas - no allocations</li>
+<li>Improved readability</li>
+</ul>
+</section>
+<section >
+<h3>Timely argument validation!</h3>
+<ul>
+<li>Iterators, async methods won't throw until first yield/await</li>
+<li>Fixed with local functions</li>
+</ul>
+</section>
+<section >
+<h3>Example - argument validation</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    IEnumerable&lt;<span class="k">int</span>&gt; MyMethod(<span class="k">int</span> count)
+    {
+        <span class="k">if</span> (count&lt;<span class="n">0</span>) <span class="k">throw</span> <span class="k">new</span> ArgumentException(nameof(count));
+
+        IEnumerable&lt;<span class="k">int</span>&gt; doCount()
+        {
+            <span class="k">for</span>(<span class="k">int</span> i=<span class="n">0</span>;i&lt;count;i+<span class="o">+</span>)
+            {
+              <span class="k">yield</span> <span class="k">return</span> someComplexCalculation(i);
+            }
+        }
+
+        <span class="k">return</span> doCount();
+    }
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Functional Dependency injection</h3>
+<ul>
+<li>Store a lastProcessed file. How to test</li>
+<li>Test-Induced Design Damage</li>
+</ul>
+<p><img src="images/rats_nest.jpg" alt="Nest" /></p>
+</section>
+<section >
+<h3>Test-Induced Design Damage</h3>
+<ul>
+<li>Interface DI - IFileRead,IFileExist. YUCK!</li>
+<li>Mock : Virtual Read, Exists. ICK</li>
+</ul>
+<blockquote>
+</blockquote>
+<ul>
+<li>Why not pass the functions themselves?</li>
+<li>Could do it before, easier now</li>
+<li>How hard could it be?</li>
+</ul>
+</section>
+<section >
+<h3>The injectionable class</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs"><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> Cutoff
+{
+    <span class="c">//Load the stored cutoff value, MinDate otherwise</span>
+    <span class="k">public</span> <span class="k">static</span> DateTime LoadFrom(<span class="k">string</span> cutoffFile,
+      Func&lt;<span class="k">string</span>,<span class="k">bool</span>&gt; exists=<span class="k">null</span>,Func&lt;<span class="k">string</span>,<span class="k">string</span>&gt; read=<span class="k">null</span>)
+    {
+        exists <span class="o">=</span> exists <span class="o">?</span><span class="o">?</span> File.Exists;
+        read <span class="o">=</span> read <span class="o">?</span><span class="o">?</span> File.ReadAllText;
+
+        <span class="k">if</span> (!exists(cutoffFile)) <span class="k">return</span> DateTime.MinValue;
+
+        <span class="c">//out variable - The only C# 7 specific feature here!</span>
+        DateTime.TryParse(read(cutoffFile), <span class="k">out</span> DateTime cutoff<span class="n">1</span>);
+        <span class="k">return</span> cutoff<span class="n">1</span>;
+    }
+
+    <span class="c">//Store the current time as a cutoff value.</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> StoreTo(<span class="k">string</span> cutoffFile,Action&lt;<span class="k">string</span>,<span class="k">string</span>&gt; write=<span class="k">null</span>)
+    {
+        write <span class="o">=</span> write <span class="o">?</span><span class="o">?</span> File.WriteAllText;
+        write(cutoffFile, DateTime.UtcNow.ToString(<span class="s">"u"</span>));
+    }
+
+}    
+</code></pre></td></tr></table>
+</section>
+<section >
+<h3>The tests</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">[Test]
+<span class="k">public</span> <span class="k">void</span> CanLoadFromExistingFile()
+{
+    <span class="k">var</span> expected=<span class="k">new</span> DateTime(<span class="n">2017</span>,<span class="n">4</span>,<span class="n">1</span>);
+
+    <span class="k">var</span> result=Cutoff.LoadFrom(<span class="s">"existingFile"</span>, exists <span class="o">=</span><span class="o">&gt;</span> <span class="k">true</span>, read <span class="o">=</span><span class="o">&gt;</span> <span class="s">"2017-04-01"</span>);
+
+    Assert.That(result,Is.EqualTo(expected));
+
+}        
+
+[Test]
+<span class="k">public</span> <span class="k">void</span> MissingFileReturnsMinDate()
+{
+    <span class="k">var</span> result <span class="o">=</span> Cutoff.LoadFrom(<span class="s">"noFile"</span>, exists <span class="o">=</span><span class="o">&gt;</span> <span class="k">false</span>);
+
+    Assert.That(result, Is.EqualTo(DateTime.MinValue));
+
+}        
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Benefits</h3>
+<ul>
+<li>Adheres to the Interfaces Non-Proliferation Treaty <img src="images\nuke.jpg" alt="Nuke" /></li>
+<li>No need for a DI container to test</li>
+<li>Very clean tests</li>
+<li>Default behaviour</li>
+</ul>
+</section>
+<section >
+<h3>Memoization</h3>
+<p>Take any function and cache intermediate results</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">public Func&lt;TIn,TOut&gt; Memoize&lt;TIn,TOut&gt;(Func&lt;TIn,TOut&gt; f)
+{
+  var cache=new Dictionary&lt;TIn,TOUt&gt;();
+  TOut do(TIn x) 
+  {
+        if (cache.ContainsKey(x)) return cache[x];
+        else 
+        {
+            var result=f(x);
+            cache[x]=result;
+            return result;
+        }
+    }
+
+    return do;
+}
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Pattern Matching and The Guns of Navarone</h3>
+<p><img src="images\Gun.jpg" alt="Gun" /></p>
+</section>
+<section >
+<h3>What are they?</h3>
+<ul>
+<li>Test a value against a "shape" - values or types</li>
+<li>Not complete but the revolution is coming</li>
+<li>Better than overrides or Visitor</li>
+</ul>
+</section>
+<section >
+<h3>Nick Craver is Happy (and Dapper too)</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Cast</span> <span class="k">and</span> <span class="k">type</span> <span class="i">check</span> <span class="i">at</span> <span class="i">once</span>
+<span class="i">https</span><span class="o">:</span><span class="c">//twitter.com/Nick_Craver/status/861258820991037440</span>
+
+<span class="i">From</span> 
+[<span class="i">lang</span><span class="o">=</span><span class="i">cs</span>]
+    <span class="k">public</span> <span class="k">static</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">bool</span> <span class="i">Update</span><span class="o">&lt;</span><span class="i">T</span><span class="o">&gt;</span>(<span class="i">this</span> <span class="i">IDbConnection</span> <span class="i">connection</span><span class="o">..</span><span class="o">.</span>)
+    {
+        <span class="i">var</span> <span class="i">proxy</span><span class="o">=</span> <span class="i">entityToUpdate</span> <span class="k">as</span> <span class="i">IProxy</span>;
+        <span class="k">if</span> (<span class="i">proxy!</span><span class="o">-</span><span class="k">null</span>)
+        {
+            <span class="k">if</span> (<span class="o">!</span><span class="i">proxy</span><span class="o">.</span><span class="i">IsDirty</span>) <span class="k">return</span> <span class="k">false</span>;
+        }
+        <span class="c">//Now start working</span>
+    }
+    
+[<span class="i">lang</span><span class="o">=</span><span class="i">cs</span>]
+
+    <span class="k">public</span> <span class="k">static</span> <span onmouseout="hideTip(event, 'fs1', 2)" onmouseover="showTip(event, 'fs1', 2)" class="i">bool</span> <span class="i">Update</span><span class="o">&lt;</span><span class="i">T</span><span class="o">&gt;</span>(<span class="i">this</span> <span class="i">IDbConnection</span> <span class="i">connection</span><span class="o">..</span><span class="o">.</span>)
+    {
+        <span class="k">if</span> (<span class="i">entityToUpdate</span> <span class="i">is</span> <span class="i">IProxy</span> <span class="i">proxy</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="i">proxy</span><span class="o">.</span><span class="i">IsDirty</span>)
+        {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        <span class="c">//Now start working</span>
+    }
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Getting rid of type checking</h3>
+<p>Circles, boxes, yada yada</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    <span class="k">switch</span>(shape)
+    {
+        <span class="k">case</span> Circle c:
+            WriteLine($<span class="s">"circle with radius {c.Radius}"</span>);
+            <span class="k">break</span>;
+        <span class="k">case</span> Rectangle s when (s.Length <span class="o">=</span><span class="o">=</span> s.Height)<span class="o">:</span>
+            WriteLine($<span class="s">"{s.Length} x {s.Height} square"</span>);
+            <span class="k">break</span>;
+        <span class="k">case</span> Rectangle r:
+            WriteLine($<span class="s">"{r.Length} x {r.Height} rectangle"</span>);
+            <span class="k">break</span>;
+        <span class="k">default</span>:
+            WriteLine(<span class="s">"&lt;unknown shape&gt;"</span>);
+            <span class="k">break</span>;
+        <span class="k">case</span> <span class="k">null</span>:
+            <span class="k">throw</span> <span class="k">new</span> ArgumentNullException(nameof(shape));
+    }
+</code></pre></td></tr></table>
+</section>
+<section >
+<h3>How about some <em>real</em> gains?</h3>
+<p>From</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    <span class="k">private</span> <span class="k">static</span> <span class="k">bool</span> TryStringSplit(<span class="k">ref</span> IEnumerable list,<span class="k">int</span> splitAt,<span class="k">string</span> namePrefix,IDbCommand command, <span class="k">bool</span> byPosition)
+    {
+        <span class="k">if</span> (list==<span class="k">null</span> <span class="o">|</span><span class="o">|</span> splitAt&lt;<span class="n">0</span>) <span class="k">return</span> <span class="k">false</span>;
+        <span class="c">//Have to specify the types explicitly</span>
+        <span class="k">if</span> (list <span class="k">is</span> IEnumerable&lt;<span class="k">int</span>&gt;) <span class="k">return</span> TryStringSplit&lt;<span class="k">int</span>&gt;(<span class="k">ref</span> list, splitAt,namePrefix, command,<span class="s">"int"</span>,byPostition,
+            (sb,i) <span class="o">=</span><span class="o">&gt;</span> sb.Append(i.ToString(CultureInfo.InvariantCulture)));
+        <span class="k">if</span> (list <span class="k">is</span> IEnumerable&lt;<span class="k">long</span>&gt;) <span class="k">return</span> TryStringSplit&lt;<span class="k">long</span>&gt;(<span class="k">ref</span> list, splitAt,namePrefix, command,<span class="s">"long"</span>,byPostition,
+            (sb,i) <span class="o">=</span><span class="o">&gt;</span> sb.Append(i.ToString(CultureInfo.InvariantCulture)));        
+        <span class="c">//Enough already !!</span>
+    }
+</code></pre></td></tr></table>
+</section>
+<section >
+<h3>How about some <em>real</em> gains?</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">To</span> 
+[<span class="i">lang</span><span class="o">=</span><span class="i">cs</span>]
+    <span class="k">private</span> <span class="k">static</span> <span onmouseout="hideTip(event, 'fs1', 3)" onmouseover="showTip(event, 'fs1', 3)" class="i">bool</span> <span class="i">TryStringSplit</span>(<span onmouseout="hideTip(event, 'fs2', 4)" onmouseover="showTip(event, 'fs2', 4)" class="i">ref</span> <span class="i">IEnumerable</span> <span onmouseout="hideTip(event, 'fs3', 5)" onmouseover="showTip(event, 'fs3', 5)" class="i">list</span>,<span onmouseout="hideTip(event, 'fs4', 6)" onmouseover="showTip(event, 'fs4', 6)" class="i">int</span> <span class="i">splitAt</span>,<span onmouseout="hideTip(event, 'fs5', 7)" onmouseover="showTip(event, 'fs5', 7)" class="i">string</span> <span class="i">namePrefix</span>,<span class="i">IDbCommand</span> <span class="i">command</span>, <span onmouseout="hideTip(event, 'fs1', 8)" onmouseover="showTip(event, 'fs1', 8)" class="i">bool</span> <span class="i">byPosition</span>)
+    {
+        <span class="k">if</span> (<span onmouseout="hideTip(event, 'fs3', 9)" onmouseover="showTip(event, 'fs3', 9)" class="i">list</span><span class="o">==</span><span class="k">null</span> <span class="o">||</span> <span class="i">splitAt</span><span class="o">&lt;</span><span class="n">0</span>) <span class="k">return</span> <span class="k">false</span>;
+        <span class="i">switch</span>(<span onmouseout="hideTip(event, 'fs3', 10)" onmouseover="showTip(event, 'fs3', 10)" class="i">list</span>)
+        {
+            <span class="c">//It&#39;s strongly typed!</span>
+            <span class="i">case</span> <span class="i">IEnumerable</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs4', 11)" onmouseover="showTip(event, 'fs4', 11)" class="i">int</span><span class="o">&gt;</span> <span class="i">l</span><span class="o">:</span>
+                <span class="c">//No need to specify a type!</span>
+                <span class="k">return</span> <span class="i">TryStringSplit</span>(<span onmouseout="hideTip(event, 'fs2', 12)" onmouseover="showTip(event, 'fs2', 12)" class="i">ref</span> <span class="i">l</span>, <span class="i">splitAt</span>,<span class="i">namePrefix</span>, <span class="i">command</span>,<span class="s">&quot;int&quot;</span>,<span class="i">byPostition</span>,
+                    (<span class="i">sb</span>,<span class="i">i</span>) <span class="o">=&gt;</span> <span class="i">sb</span><span class="o">.</span><span class="i">Append</span>(<span class="i">i</span><span class="o">.</span><span class="i">ToString</span>(<span class="i">CultureInfo</span><span class="o">.</span><span class="i">InvariantCulture</span>)));
+            <span class="i">case</span> <span class="i">IEnumerable</span><span class="o">&lt;</span><span class="i">long</span><span class="o">&gt;</span> <span class="i">l</span><span class="o">:</span>
+                <span class="k">return</span> <span class="i">TryStringSplit</span>(<span onmouseout="hideTip(event, 'fs2', 13)" onmouseover="showTip(event, 'fs2', 13)" class="i">ref</span> <span class="i">l</span>, <span class="i">splitAt</span>,<span class="i">namePrefix</span>, <span class="i">command</span>,<span class="s">&quot;long&quot;</span>,<span class="i">byPostition</span>,
+                    (<span class="i">sb</span>,<span class="i">i</span>) <span class="o">=&gt;</span> <span class="i">sb</span><span class="o">.</span><span class="i">Append</span>(<span class="i">i</span><span class="o">.</span><span class="i">ToString</span>(<span class="i">CultureInfo</span><span class="o">.</span><span class="i">InvariantCulture</span>)));
+        }            
+    }
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Out varialbes</h3>
+<ul>
+<li>Just saving a line</li>
+<li>And tightening the scope</li>
+<li>But when you put it together</li>
+</ul>
+</section>
+<section >
+<h3>Nick Craver is happy again</h3>
+<p>From</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    <span class="k">object</span> SqlMapper.IParameterLookup.<span class="k">this</span>[<span class="k">string</span> name]
+    {
+        get
+        {
+            ParamInfo param;
+            <span class="k">return</span> parameters.TryGetValue(name,<span class="k">out</span> param)?param.Value <span class="o">:</span> <span class="k">null</span>;
+        }
+    }
+</code></pre></td></tr></table>
+<p>To</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    <span class="k">object</span> SqlMapper.IParameterLookup.<span class="k">this</span>[<span class="k">string</span> name] <span class="o">=</span><span class="o">&gt;</span>
+        parameters.TryGetValue(name,<span class="k">out</span> ParamInfo param)?param.Value <span class="o">:</span> <span class="k">null</span>;
+</code></pre></td></tr></table>
+<p>That's where local functions are born</p>
+</section>
+<section >
+<h3>A whiff  of gunpowder</h3>
+<ul>
+<li>New error handling scenarios</li>
+<li>Exceptions are <em>Exceptional</em></li>
+<li>Like a blown fuse, not a light switch</li>
+<li>Not a logging control flow statement</li>
+</ul>
+<p>What about non-critical <em>errors</em></p>
+<p><img src="images/FuseFire.jpg" alt="Fire" /></p>
+</section>
+<section >
+<h3>Go's multiple return values</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    (<span class="k">string</span> result,<span class="k">string</span> error) TheQuestion()
+    {
+        <span class="k">if</span> (vogonsArrived)
+        {
+            <span class="k">return</span> (<span class="k">null</span>,<span class="s">"Goodbye and thanks for all the fish"</span>);
+        }
+        <span class="k">else</span> 
+        {
+            <span class="k">return</span> (<span class="s">"How much is 6 by 8?"</span>,<span class="k">null</span>);
+        }            
+    }
+
+
+    <span class="k">var</span> (result,error)=TheQuestion();
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Caveats</h3>
+<p><img src="images\Fuses.jpg" alt="Fuses" /></p>
+</section>
+<section >
+<h3>Caveats</h3>
+<ul>
+<li>
+Only <code>variable not used</code> warning if error ignored
+&gt; - Can be set as Error
+</li>
+<li>No warning if tuple isn't decomposed</li>
+<li>Take care to avoid the ignored error curse</li>
+<li>Not for public APIs - names aren't preserved</li>
+</ul>
+</section>
+<section >
+<h3>Pattern Matching and Case Types</h3>
+<ul>
+<li>Scala feature</li>
+<li>One type, multiple cases</li>
+<li>No base type littering</li>
+<li>More Nick Craver happiness</li>
+<li>Result<TSuccess,TFailure></li>
+</ul>
+</section>
+<section >
+<h3>Result Type</h3>
+<ul>
+<li>Return a Result<TSuccess,TFailure> type</li>
+<li>Allows composition of functions</li>
+<li>Works for public APIs</li>
+</ul>
+</section>
+<section >
+<h3>Example</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="cs">    <span class="k">public</span> <span class="k">interface</span> IResult&lt;TSuccess,TFailure&gt;{}
+    <span class="k">public</span> <span class="k">class</span> Success&lt;TSuccess,TFailure&gt;:IResult&lt;TSuccess,TFailure&gt;{
+        <span class="k">public</span> TSuccess Result {get;}
+
+        Success(TSuccess it)<span class="o">=</span><span class="o">&gt;</span> Result=it;
+    }
+    <span class="k">public</span> <span class="k">class</span> Failure&lt;TSuccess,TFailure&gt;:IResult&lt;TSuccess,TFailure&gt;{
+        <span class="k">public</span> TFailure Error {get;}
+
+        Failure(TFailure it)<span class="o">=</span><span class="o">&gt;</span> Error=it;
+    }
+</code></pre></td></tr></table>
+<p>'NOTE: Show Demo</p>
+</section>
+<section >
+<h3>Usage</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="CS">public IResult&lt;int,string&gt; DoSomething(){};
+
+public IResult&lt;int,string&gt; DoAnother()
+{
+    var result=DoSomething();
+    switch(result)
+    {
+        case Success&lt;int,string&gt; c: return new Success(-c.Success);
+        case Failure&lt;int,string&gt; c: return new Failure(c.Error)
+    }
+}
+</code></pre></td></tr></table>
+<p>Return types can be chained</p>
+</section>
+<section >
+<h3>Caveats</h3>
+<ul>
+<li>No exhaustive matching</li>
+<li>Take care to avoid the ignored error curse</li>
+</ul>
+</section>
+<section >
+<h1>Thank You!</h1>
+<h2>Επόμενες συναντήσεις</h2>
+<ul>
+<li>Πέμπτη  8 Ιουνίου</li>
+<li>Πέμπτη 29 Ιουνίου</li>
+</ul>
+<h2>Ζητούνται ομιλητές!</h2>
+</section>
+
+
+        </div>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+        // Add the nohighlight class and data-noescape attribute to code elements that have already been formatted by FSharp.Formatting
+        $('pre.highlighted code').addClass('nohighlight').attr('data-noescape', '');
+
+        // Full list of configuration options available here:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+
+            transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+            // Parallax scrolling
+            // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+            // parallaxBackgroundSize: '2100px 900px',
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                { src: 'lib/js/classList.js', condition: function () { return !document.body.classList; } },
+                { src: 'plugin/markdown/marked.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+                { src: 'plugin/markdown/markdown.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+                { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } },
+                { src: 'plugin/zoom-js/zoom.js', async: true, condition: function () { return !!document.body.classList; } },
+                { src: 'plugin/notes/notes.js', async: true, condition: function () { return !!document.body.classList; } }
+            ]
+        });
+
+    </script>
+</body>
+</html>
+
