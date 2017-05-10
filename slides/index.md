@@ -58,6 +58,8 @@ On the road to Expressions
 
 ***
 
+Define as
+
 	[lang=CS]
 	    (string first, string last) LookupName(long id){ return (first:"a", last:"b");}
         //or
@@ -73,6 +75,7 @@ Use
 	    Console.WriteLine(first);
 
 ' Note: Show Demo
+
 *** 
 
 ### Why not build a class?
@@ -128,6 +131,8 @@ Solved with records in C# 8+
         //
     }
 
+'NOTE: Show Demo
+
 ***
 
 ### Local Functions
@@ -162,6 +167,8 @@ Solved with records in C# 8+
 
             return doCount();
         }
+
+'NOTE: Show Demo
 
 ***
 
@@ -240,6 +247,8 @@ Solved with records in C# 8+
 
     }        
 
+'NOTE: Show Demo
+
 ***
 
 ### Benefits
@@ -272,6 +281,8 @@ Take any function and cache intermediate results
 
 	    return do;
 	}
+
+'NOTE: Show Demo
 
 ***
 
@@ -450,6 +461,8 @@ What about non-critical *errors*
 
         var (result,error)=TheQuestion();
 
+'NOTE: Show Demo
+
 ***
 
 ### Caveats
@@ -502,6 +515,8 @@ What about non-critical *errors*
 
             Failure(TFailure it)=> Error=it;
         }
+
+'NOTE: Show Demo
 
 ***
 
