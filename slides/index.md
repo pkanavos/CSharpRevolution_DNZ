@@ -530,3 +530,13 @@ Return types can be chained
 - Take care to avoid the ignored error curse
 
 
+***
+
+# Thank You!
+
+## Επόμενες συναντήσεις
+
+- Πέμπτη  8 Ιουνίου
+- Πέμπτη 29 Ιουνίου
+
+## Ζητούνται ομιλητές!
